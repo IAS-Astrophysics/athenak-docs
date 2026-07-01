@@ -1,13 +1,10 @@
 AthenaK documentation
 =====================
 
-.. figure:: /_static/athenak_hero.png
+.. image:: /_static/athenak_hero.png
    :alt: AthenaK simulation
    :align: center
    :width: 100%
-
-   Rayleigh--Taylor instability computed with AthenaK, showing the adaptive
-   mesh refinement (AMR) block structure tracking the turbulent mixing layer.
 
 AthenaK is a block-based AMR framework with fluid, particle, and numerical relativity
 solvers implemented with `Kokkos <https://kokkos.org/>`_ for performance portability.
@@ -45,3 +42,31 @@ This site covers how to obtain, build, and run the code.
    smr
    amr
    problem_generators
+
+.. toctree::
+   :caption: Physics Modules
+   :maxdepth: 1
+
+   hydro_mhd
+   ion_neutral
+   diffusion
+   source_terms
+   radiation
+   numerical_relativity
+   dyngrmhd
+   dyngrmhd_eos
+   particles
+
+.. toctree::
+   :caption: Other Features
+   :maxdepth: 1
+
+   shearing_box
+   units
+   autotest
+
+.. toctree::
+   :caption: Help
+   :maxdepth: 1
+
+   faq

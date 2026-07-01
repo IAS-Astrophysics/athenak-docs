@@ -5,7 +5,9 @@ author = "AthenaK contributors"
 copyright = "2026, AthenaK contributors"
 release = "latest"
 
-extensions = []
+extensions = [
+    "sphinx.ext.mathjax",
+]
 
 templates_path = ["_templates"]
 exclude_patterns = ["_build", "Thumbs.db", ".DS_Store"]
