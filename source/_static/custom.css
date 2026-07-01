@@ -1,0 +1,11 @@
+/* Hide Furo's right-hand "On this page" table of contents */
+.toc-drawer {
+  display: none !important;
+}
+
+/* Hide the toggles that open the right-hand TOC (header icon and mobile overlay) */
+.toc-header-icon,
+.toc-content-icon,
+.toc-overlay {
+  display: none !important;
+}

@@ -21,5 +21,8 @@ Then open `build/html/index.html` in a browser. Alternatively, use `make html`.
 
 This first version covers:
 
-- **Getting Started**: installation, requirements, download, and build instructions.
-- **Quickstart**: running AthenaK for the first time.
+- **Getting Started**: requirements, download, and build instructions.
+- **Quickstart: Run a Sod Shock Tube**: a short end-to-end tutorial (compile, run,
+  visualize).
+- **Running**: running the code, the input file, outputs, analysis, and notes for
+  specific machines.

@@ -11,3 +11,4 @@ This site covers how to obtain, build, and run the code.
 
    getting_started
    quickstart
+   running

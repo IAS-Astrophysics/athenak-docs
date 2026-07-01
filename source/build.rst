@@ -121,7 +121,8 @@ Check executable options:
 Next step
 ---------
 
-Continue with :doc:`quickstart` for a first input-file run.
+Continue with :doc:`quickstart` for a complete first run, or see
+:doc:`running_the_code` for the full reference on running AthenaK.
 
 References
 ----------
