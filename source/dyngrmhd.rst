@@ -47,8 +47,8 @@ Enabling the Valencia solver
 ----------------------------
 
 The Valencia solver can be enabled by starting with a standard GRMHD parfile and adding an
-``<adm>`` or ``<z4c>`` block. There are a few new ``<mhd>`` parameters available for the
-Valencia solver:
+``<adm>`` or ``<z4c>`` block (see :doc:`numerical_relativity` for enabling Z4c). There are
+a few new ``<mhd>`` parameters available for the Valencia solver:
 
 - ``mhd/dyn_eos``: the PrimitiveSolver EOS (currently supports ``ideal`` for an ideal gas,
   ``piecewise_poly`` for piecewise polytropes, and ``hybrid`` or ``eos_compose`` for a
