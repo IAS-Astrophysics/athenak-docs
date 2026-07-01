@@ -37,3 +37,32 @@ code, pre, kbd, samp,
 .pre {
   font-family: var(--font-stack--monospace);
 }
+
+/* --------------------------------------------------------------------------
+   Tighter sidebar navigation: reduce the vertical space between links and,
+   especially, between the section (caption) groups.
+   -------------------------------------------------------------------------- */
+/* Space above each section caption (the gap between one group and the next) */
+.sidebar-tree .caption,
+.sidebar-tree p.caption {
+  margin-top: 0.6rem;
+  margin-bottom: 0.1rem;
+}
+
+/* First caption shouldn't add extra space at the very top */
+.sidebar-tree > .caption:first-child,
+.sidebar-tree > p.caption:first-child {
+  margin-top: 0;
+}
+
+/* Space between individual links */
+.sidebar-tree li {
+  margin: 0;
+}
+
+.sidebar-tree .toctree-l1 > .reference,
+.sidebar-tree .toctree-l2 > .reference,
+.sidebar-tree .toctree-l3 > .reference {
+  padding-top: 0.15rem;
+  padding-bottom: 0.15rem;
+}

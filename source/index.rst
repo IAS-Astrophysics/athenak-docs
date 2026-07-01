@@ -39,6 +39,7 @@ This site covers how to obtain, build, and run the code.
    :caption: Grid and Initial Conditions
    :maxdepth: 1
 
+   uniform_mesh
    smr
    amr
    problem_generators
@@ -47,7 +48,8 @@ This site covers how to obtain, build, and run the code.
    :caption: Physics Modules
    :maxdepth: 1
 
-   hydro_mhd
+   hydro
+   mhd
    ion_neutral
    diffusion
    source_terms
