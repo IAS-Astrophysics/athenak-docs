@@ -16,79 +16,39 @@ for dynamical spacetimes because it does not require explicit time derivatives o
 quantities. AthenaK makes both forms available, but only the Valencia solver can be used in
 generic spacetimes.
 
-The 3+1 split is defined by a projection operator
-:math:`\gamma_{\mu\nu} = g_{\mu\nu} + n_\mu n_\nu`, where :math:`n^\mu` is a unit time-like
-normal vector with respect to a spatial slice (a three-dimensional spacelike hypersurface) of
-spacetime. If we define :math:`n^\mu = (-1/\alpha, \beta^i/\alpha)` for a lapse function
-:math:`\alpha` and shift vector :math:`\beta^i`, we can decompose the metric as follows:
+The dynamical GRMHD solver (or DynGRMHD) uses the following as primitive variables:
 
-.. math::
+- :math:`\rho`: The rest-mass density
 
-   g_{\mu\nu} dx^\mu dx^\nu = -\alpha^2 dt^2
-     + \gamma_{ij}\left(\beta^i dt + dx^i\right)\left(\beta^j dt + dx^j\right),
+- :math:`Wv^i`: The three-velocity weighted by the Lorentz factor (i.e.,
+  :math:`Wv^i = \gamma^i_\mu u^\mu`)
 
-where the spatial components of the projection operator, :math:`\gamma_{ij}`, are
-collectively referred to as the "spatial metric". We can use this decomposition to rewrite
-the GRMHD equations in a form more amenable for numerical relativity.
+- :math:`P`: The fluid pressure. **Note that this differs from the stationary spacetime
+  GRMHD solver, which uses internal energy density.**
 
-Consider a set of primitive variables :math:`\rho`, :math:`v^i`, and :math:`P`, which are the
-rest-mass density, the three-velocity, and pressure, respectively. We can define a set of
-conserved variables
+- :math:`Y^i`: Any advected scalars, such as the electron fraction :math:`Y_e`.
 
-.. math::
-   :nowrap:
+DynGRMHD evolves the following conserved variables:
 
-   \begin{align}
-   D &= \rho W, \\
-   S_i &= (\rho h W^2 + B^2)v_i - (B^j v_j) B_i, \\
-   \tau &= \rho h W^2 + B^2 - P
-     - \frac{1}{2}\left[\frac{B^2}{W^2} + (B^j v_j)^2\right] - D,
-   \end{align}
+- :math:`D`: The density in the Eulerian frame
 
-where :math:`W = (1 - v^2)^{-1/2}` is the Lorentz factor,
-:math:`h = 1 + \epsilon + P/\rho` is the total specific enthalpy (:math:`\epsilon` is the
-specific internal energy), and :math:`B^i` is the magnetic field as measured by a normal
-observer in the lab frame (i.e., :math:`B^i = n_\mu \left(\ast F\right)^{\mu i}`). The evolved
-equations then take the form
+- :math:`S_i`: The momentum density, including magnetic field contributions.
 
-.. math::
-   :nowrap:
+- :math:`\tau`: The fluid energy density with the rest mass subtracted off.
 
-   \begin{align}
-   \partial_t\left(\tilde{D}\right)
-     + \partial_j\left(\alpha\tilde{D}\hat{v}^j\right) &= 0, \\
-   \partial_t\left(\tilde{S}_i\right)
-     + \partial_j\left[\alpha \tilde{S}_i\hat{v}^j - \alpha b_i \frac{B^j}{W}
-     + \alpha\sqrt{\gamma}\left(P+\frac{b^2}{2}\right)\delta^j_i\right]
-     &= \frac{1}{2}\alpha\tilde{S}^{jk}\partial_i\gamma_{jk}
-     + \tilde{S}_j\partial_i\beta^j - \tilde{E}\partial_i\alpha, \\
-   \partial_t\left(\tilde{\tau}\right)
-     + \partial_j\left[\alpha\tilde{\tau}\hat{v}^j - \alpha^2 b^0\frac{\tilde{B}^j}{W}
-     + \alpha\sqrt{\gamma}\left(P+\frac{b^2}{2}\right)\right]
-     &= \alpha K_{ij}\tilde{S}^{ij} - \tilde{S}^i\partial_i\alpha, \\
-   \partial_t\left(\tilde{B}^i\right)
-     + \partial_j\left(\alpha\left[\tilde{B}^i \hat{v}^j
-     - \tilde{B}^j \hat{v}^i\right]\right) &= 0,
-   \end{align}
+- :math:`DY^i`: Density-weighted advected scalars.
 
-where :math:`\gamma = \det(\gamma_{ij})`, :math:`\tilde{A} = \sqrt{\gamma} A`,
-:math:`\hat{v}^i = v^i - \beta^i/\alpha`, :math:`b^\mu = u_\nu\left(\ast F\right)^{\nu\mu}` is
-the magnetic field in the fluid frame, and :math:`E = \tau + D`. Note that though these
-equations appear to be different than those used in the typical HARM-like formulation, the
-only truly different equation is the energy equation: :math:`\tilde{D}=\sqrt{-g}\rho u^0`,
-:math:`\tilde{S}_i = \sqrt{-g}T^0_i`, and :math:`\tilde{B}^i = \sqrt{-g}\bar{B}^i`, where
-:math:`\bar{B}^i` is the magnetic field in the coordinate frame as used in HARM-like
-formulations.
+- :math:`B^i`: The magnetic field for an Eulerian/normal observer.
 
-The energy equation is derived by performing a 3+1 decomposition on
-:math:`\nabla_\nu\left(n_\mu T^{\mu\nu}\right) = T^{\mu\nu}\nabla_\nu n_\mu`.
+For references on the definitions of these variables and their equations, see the AthenaK
+BNS methods paper: `arXiv:2409.10384 <https://arxiv.org/abs/2409.10384>`_.
 
 Enabling the Valencia solver
 ----------------------------
 
 The Valencia solver can be enabled by starting with a standard GRMHD parfile and adding an
-``<adm>`` or ``<z4c>`` block. There are a few new ``<mhd>`` parameters available for the
-Valencia solver:
+``<adm>`` or ``<z4c>`` block (see :doc:`numerical_relativity` for enabling Z4c). There are
+a few new ``<mhd>`` parameters available for the Valencia solver:
 
 - ``mhd/dyn_eos``: the PrimitiveSolver EOS (currently supports ``ideal`` for an ideal gas,
   ``piecewise_poly`` for piecewise polytropes, and ``hybrid`` or ``eos_compose`` for a
@@ -112,16 +72,16 @@ Valencia solver:
   permitted range without enabling FOFC to :math:`A\in [A_\mathrm{min}/M, M A_\mathrm{max}]`,
   where :math:`A\in\{\tilde{D},\tilde{\tau}\}`.
 
-If only the ``<adm>`` block is present, the Valencia GRMHD solver is enabled but the spacetime
-is not evolved, making it possible to do GRMHD in a fixed but otherwise generic spacetime as
-defined by the problem generator. However, for all non-Minkowski spacetimes, the problem
-generator must set ``ADM::SetADMVariables`` to a function pointer which can update the metric
-in order to be compatible with AMR. This same functionality can also be used for analytic or
-semi-analytic time-dependent metrics (e.g., FLRW), which can be enabled in the parameter file
-with ``adm/dynamic = true``.
+If only the ``<adm>`` block is present, DynGRMHD is enabled but the spacetime is not
+evolved, making it possible to do GRMHD in a fixed but otherwise generic spacetime as
+defined by the problem generator. However, for all non-Minkowski or Kerr-Schild
+spacetimes, the problem generator must set ``ADM::SetADMVariables`` to a function pointer
+which can update the metric in order to be compatible with AMR. This same functionality
+can also be used for analytic or semi-analytic time-dependent metrics (e.g., FLRW), which
+can be enabled in the parameter file with ``adm/dynamic = true``.
 
-Evolution and output details
-----------------------------
+Evolution details
+-----------------
 
 - Reconstruction is performed on :math:`\rho`, :math:`W v^i`, :math:`P`, scalar fractions
   :math:`Y^i`, and :math:`\tilde{B}^i`.
@@ -137,6 +97,61 @@ Evolution and output details
   :math:`Y^i`, temperature :math:`T`, and :math:`\tilde{B}^i`.
 - Conserved variable output (``mhd_u_bcc``) contains :math:`\tilde{D}`, :math:`\tilde{S}_i`,
   :math:`\tilde{\tau}`, :math:`\tilde{D}Y^i`, and :math:`\tilde{B}^i`.
+
+Outputs
+-------
+
+DynGRMHD supports the same standard outputs as the other MHD solvers. The following
+variable mapping is used:
+
+Primitive variables (included in outputs ``mhd_w`` and ``mhd_w_bcc``):
+
+- :math:`\rho`: ``dens`` (``mhd_w_d``)
+
+- :math:`Wv^i`: ``velx``, ``vely``, and ``velz`` (``mhd_w_vx``, ``mhd_w_vy``, and ``mhd_w_vz``)
+
+- :math:`P`: ``press`` (``mhd_w_e``)
+
+- :math:`Y^i`: ``s_00``, ``s_01``, ``s_02``, etc. (``mhd_w_s``)
+
+The fluid temperature :math:`T` is also appended to these arrays. It is also available as
+a standalone output using ``mhd_t``, and it shows up in files as ``temperature``.
+
+Conservative variables (included in outputs ``mhd_u`` and ``mhd_u_bcc``):
+
+- :math:`D`: ``dens`` (``mhd_u_d``)
+
+- :math:`S_i`: ``mom1``, ``mom2``, and ``mom3`` (``mhd_u_m1``, ``mhd_u_m2``, and ``mhd_u_m3``)
+
+- :math:`\tau`: ``ener`` (``mhd_u_e``)
+
+Note that DynGRMHD writes out conserved variables in their *densitized* form, or weighted
+by the volume form. For example, ``dens`` corresponds to :math:`\tilde{D} = \sqrt{\gamma}D`,
+not just :math:`D`.
+
+Cell-centered magnetic fields (included in outputs ``mhd_w_bcc``, ``mhd_u_bcc``, and
+``mhd_bcc``):
+
+- :math:`B^i`: ``bcc1``, ``bcc2``, and ``bcc3`` (``mhd_bcc1``, ``mhd_bcc2``, and ``mhd_bcc3``)
+
+The magnetic fields are densitized in both ``mhd_w_bcc`` and ``mhd_u_bcc``.
+
+The ADM variables (included in the output ``adm``):
+
+- :math:`g_{ij}`: ``adm_gxx``, ``adm_gxy``, ``adm_gxz``, ``adm_gyy``, ``adm_gyz``, and
+  ``adm_gzz``
+
+- :math:`K_{ij}`: ``adm_Kxx``, ``adm_Kxy``, ``adm_Kxz``, ``adm_Kyy``, ``adm_Kyz``, and
+  ``adm_Kzz``
+
+- :math:`\psi^4`: ``adm_psi4``
+
+- :math:`\alpha`: ``adm_alpha`` [#f1]_
+
+- :math:`\beta^i`: ``adm_betax``, ``adm_betay``, and ``adm_betaz`` [#f1]_
+
+.. [#f1] If Z4c is also active, the gauge variables :math:`\alpha` and :math:`\beta^i`
+  will be written to the Z4c output rather than the ADM output.
 
 TOV problems
 ------------
