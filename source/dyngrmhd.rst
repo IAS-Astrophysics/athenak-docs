@@ -72,7 +72,7 @@ a few new ``<mhd>`` parameters available for the Valencia solver:
   permitted range without enabling FOFC to :math:`A\in [A_\mathrm{min}/M, M A_\mathrm{max}]`,
   where :math:`A\in\{\tilde{D},\tilde{\tau}\}`.
 
-If only the ``<adm>`` block is present, the DynGRMHD is enabled but the spacetime is not
+If only the ``<adm>`` block is present, DynGRMHD is enabled but the spacetime is not
 evolved, making it possible to do GRMHD in a fixed but otherwise generic spacetime as
 defined by the problem generator. However, for all non-Minkowski or Kerr-Schild
 spacetimes, the problem generator must set ``ADM::SetADMVariables`` to a function pointer
@@ -150,8 +150,8 @@ The ADM variables (included in the output ``adm``):
 
 - :math:`\beta^i`: ``adm_betax``, ``adm_betay``, and ``adm_betaz`` [#f1]_
 
-.. [#f1] If Z4c is also active, the gauge variables :math:`\alpha` and :math:`\beta^i` are
-  will *not* be output.
+.. [#f1] If Z4c is also active, the gauge variables :math:`\alpha` and :math:`\beta^i`
+  will be written to the Z4c output rather than the ADM output.
 
 TOV problems
 ------------
