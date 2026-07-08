@@ -1,7 +1,7 @@
 # AthenaK documentation
 
 User-facing documentation for [AthenaK](https://github.com/IAS-Astrophysics/athenak),
-built with AI using [Sphinx](https://www.sphinx-doc.org/) and the
+built with the hlpe of AI using [Sphinx](https://www.sphinx-doc.org/) and the
 [Furo](https://pradyunsg.me/furo/) theme. This site is intended to replace the
 project's GitHub wiki.
 
