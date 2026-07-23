@@ -52,7 +52,8 @@ is:
      - Down-sampled (coarsened) binary dump; optionally computes moments.
    * - ``sph``
      - Interpolated spherical surface
-     - Data interpolated onto a latitude/longitude grid at a given radius; written as VTK.
+     - Data interpolated onto a latitude/longitude grid at a given radius or a list of radii;
+       written as VTK.
    * - ``cart``
      - Interpolated Cartesian grid
      - Data resampled onto a uniform Cartesian grid.
@@ -254,7 +255,9 @@ Interpolated spherical grid
 ---------------------------
 
 AthenaK can interpolate data to a latitude/longitude spherical grid and save it to a
-``.vtk`` file. An example of this is shown below:
+``.vtk`` file. The user can either interpolate onto a single radius or a list of radii. 
+This allows merging multiple output blocks for the same variable at different radii into 
+a single output block. For a single radius we can add the following block:
 
 .. code-block:: text
 
@@ -267,6 +270,29 @@ AthenaK can interpolate data to a latitude/longitude spherical grid and save it 
    xc        = 0.0       # x, y, and z coordinates of center of sphere; (0, 0, 0) by default.
    yc        = 0.0
    zc        = 0.0
+
+Alternatively, instead of ``radius``, we can manually add a list of radii with:
+
+.. code-block:: text
+
+  <output4>
+  file_type = sph
+  ...
+  radii     = 10.0 20.0 30.0
+
+A more convenient way is to specify a range of radii:
+
+.. code-block:: text
+
+  <output5>
+  file_type = sph
+  ...
+  r_min     = 10.0
+  r_max     = 100.0
+  nradii    = 100
+  r_spacing = log # linear
+
+The user can choose between log- or linear-spacing.
 
 Interpolated cartesian grid
 ---------------------------
