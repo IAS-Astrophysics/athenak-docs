@@ -11,11 +11,8 @@ These ODE solvers require that the ODEs they're solving have a
 consistent interface. This is discussed in more detail in the `Developer
 Documentation <#developer-documentation>`__
 
-How to Use
-----------
-
 Input File
-~~~~~~~~~~
+----------
 
 ODE solvers are chosen and initialized in the module that they are used
 and so the parameters for them should be defined within the block of a
@@ -35,6 +32,9 @@ another module those sections of your input file might look like this:
    ode_solver        = forward_euler # ODE solver to be used
    fe_n_subcycle_max = 1e7           # maximum number of substeps for the forward euler ODE solver
 
+Available ODE Solvers
+---------------------
+
 Forward Euler
 ~~~~~~~~~~~~~
 
@@ -45,6 +45,8 @@ primarily intended for testing due to its simplicity and isn't
 necessarily expected to be performant or highly accurate.
 
 Runtime Parameters:
+
+This ODE solver can be selected with ``ode_system = forward_euler``
 
 +-------------------+------+-----------+----------------------------------------------------+
 | Option            | Type | Default   | Description                                        |
@@ -58,16 +60,29 @@ Runtime Parameters:
 
 *"fe" stands for Forward Euler.*
 
+Kokkos Kernels BDF
+~~~~~~~~~~~~~~~~~~
+
+AthenaK provides a wrapper around the ``KokkosODE::Experimental::BDFSolve``
+function in Kokkos Kernels. This solver requires both the ``evaluate_function``
+and ``evaluate_jacobian`` functions to be defined.
+
+Runtime Parameters:
+
+This ODE solver can be selected with ``ode_system = kokkos_BDF``
+
 Developer Documentation
 -----------------------
 
-To facilitate easy swapping between different ODE solvers both the
-solvers and ODE system classes must have a very strict APIs. The forward
-euler solver in
-`forward_euler.hpp <https://github.com/IAS-Astrophysics/athenak/blob/master/src/ode_solvers/forward_euler.hpp>`__
-and H2 network in
-`H2.hpp <https://github.com/IAS-Astrophysics/athenak/blob/master/src/chemistry/network/H2.hpp>`__ can serve as
-a templates but here's a description of the APIs in more detail.
+To facilitate easy swapping between different ODE solvers both the solvers and
+ODE system classes must have a very strict APIs. The API presented here is
+intended to work well with the Kokkos Kernels ODE solvers but, with a proper
+wrapper, will hopefully work well with any ODE solver. The forward euler solver
+in `forward_euler.hpp
+<https://github.com/IAS-Astrophysics/athenak/blob/master/src/ode_solvers/forward_euler.hpp>`__
+and H2 network in `H2.hpp
+<https://github.com/IAS-Astrophysics/athenak/blob/master/src/chemistry/network/H2.hpp>`__
+can serve as a templates but here's a description of the APIs in more detail.
 
 ODE Solver API
 ~~~~~~~~~~~~~~
@@ -85,7 +100,7 @@ consists of three methods:
 
   - ``ODESettings const settings``: the struct that contains the runtime
     parameters for the solver
-  - ``T& ode_system``: The ODE object to evolve
+  - ``ode_t& ode_system``: The ODE object to evolve
   - ``Real const t_start``: The start time
   - ``Real const dt``: How much time to evolve the ODEs
 
@@ -105,13 +120,35 @@ following members:
   updated by the solver. This must support accesses ``operator()`` and
   ``operator[]``, the ``RegisterArray`` class provides this syntax if a
   Kokkos View doesn't work.
-- A ``f`` member variable. It should be an array of type ``Real`` with
+- A ``y_new`` member variable. It should be an array of type ``Real`` with
   length ``neqs`` that contains the result of evaluating the ODE
-- An ``evaluate_function()`` method that computes new values of ``f``
-  from the values of ``y``
+- An ``evaluate_function()`` method that computes new values of ``y_new``
+  from the values of ``y`` and has the following signature:
+
+  .. code:: cpp
+
+    template <class vec_type1, class vec_type2>
+    KOKKOS_FUNCTION void evaluate_function(const Real /*t*/, 
+                                           const Real /*dt*/, 
+                                           const vec_type1& y_in, 
+                                           vec_type2& f) const
+
+- Some ODE solvers require the Jacobian of the system as well in the form of a
+  ``evaluate_jacobian()`` method that computes the Jacobian. If your ODE systems
+  doesn't have an analytical Jacobian then the ``chemistry::numerical_jacobian``
+  function can compute a numerical Jacobian for you. The function signature
+  should be:
+
+  .. code:: cpp
+
+    template <class vec_type, class mat_type>
+    KOKKOS_FUNCTION void evaluate_jacobian(const Real t, 
+                                           const Real dt,
+                                           const vec_type& y_in,
+                                           const mat_type& jac) const 
 
 Specific ODE solvers might require other methods and they are noted
-below.
+in their sections above.
 
 Code Example
 ~~~~~~~~~~~~
@@ -124,79 +161,90 @@ is below.
 
 .. code:: cpp
 
-   // First we select which ODE system to use (the H2 network) and which ODE solver
-   // to use (forward euler) and get their settings from the input file
-   TaskStatus Chemistry::UpdateChemistryTask(Driver* d, int stage) {
-     const std::string network = my_pin->GetString("chemistry", "network");
-     const std::string ode_solver = my_pin->GetString("chemistry", "ode_solver");
+    // First we select which ODE system to use (the H2 network) and which ODE solver
+    // to use (forward euler)
+    TaskStatus Chemistry::UpdateChemistryTask(Driver* d, int stage) {
+      const std::string network = my_pin->GetString("chemistry", "network");
+      const std::string ode_solver = my_pin->GetString("chemistry", "ode_solver");
 
-     if (network == "H2") {
-       auto h2_settings = H2Network::GetSettings(my_pin);
-       if (ode_solver == "forward_euler") {
-         auto fe_settings = ode_solvers::ForwardEuler<H2Network>::GetSettings(
-             my_pin, "chemistry");
-         UpdateChemistry<ode_solvers::ForwardEuler<H2Network>, H2Network>(
-             fe_settings, h2_settings);
-       }
-     }
+      if (network == "H2") {
+        if (ode_solver == "forward_euler") {
+          UpdateChemistry<ode_solvers::ForwardEuler, H2Network>();
+        } else if (ode_solver == "kokkos_BDF") {
+          UpdateChemistry<ode_solvers::KokkosBDF, H2Network>();
+        }
+      }
 
-     return TaskStatus::complete;
-   }
+      return TaskStatus::complete;
+    }
 
-   // Now we actually use the solver in a kernel to solve the system of ODEs
-   template <typename ODE_Solver_t, typename Network_t, typename ODESettings,
-             typename NetworkSettings>
-   void Chemistry::UpdateChemistry(ODESettings const& ode_settings,
-                                   NetworkSettings const& network_settings) {
-     // ------ Collect variables that we'll need -----
-     // The primitive grid
-     auto w0 = GetW0();
-     // The time at the beginning of this timestep
-     Real const t_start = pmy_pack->pmesh->time;
-     // The timestep
-     Real const dt = pmy_pack->pmesh->dt;
+    // Now we actually use the solver in a kernel to solve the system of ODEs
+    template <template <typename> class ODE_Solver_t, typename Network_t>
+    void Chemistry::UpdateChemistry() {
+      // ------ Collect variables that we'll need -----
+      // The primitive grid
+      auto w0 = GetW0();
+      // The time at the beginning of this timestep
+      Real const t_start = pmy_pack->pmesh->time;
+      // The timestep
+      Real const dt = pmy_pack->pmesh->dt;
 
-     // ----- Variables for the ODE solver -----
-     // For reporting if the ODE solver doesn't converge
-     DvceArray0D<bool> chemisty_ode_failure("chemisty_ode_failure", false);
+      // ----- Get the unit conversions and constants we'll need -----
+      Real const time_cgs = pmy_pack->punit->time_cgs();
+      Real const energy_density_cgs = pmy_pack->punit->pressure_cgs();
+      Real const density_cgs = pmy_pack->punit->density_cgs();
+      Real const hydrogen_mass_cgs = pmy_pack->punit->hydrogen_mass_cgs;
+      Real const gamma = pmy_pack->phydro->peos->eos_data.gamma;
+      Real const mu_H_local = mu_H;
 
-     Kokkos::parallel_for(
-         "Chemistry_ODE_Solve", policy,
-         KOKKOS_LAMBDA(const int& mb_idx, const int& k, const int& j,
-                       const int& i) {
-           // Create the chemisty object
-           Network_t chem_net(network_settings, w0(mb_idx, IDN, k, j, i));
+      // ----- Load network and ODE solver settings -----
+      auto const ode_settings = ODE_Solver_t<Network_t>::GetSettings(my_pin, "chemistry");
+      auto const network_settings = Network_t::GetSettings(my_pin);
 
-           // ------ Load cell values ------
-           // Load values into the `y` array
-           int grid_idx = species_start_idx;
-           for (int s_idx = 0; s_idx < Network_t::neqs; s_idx++) {
-             chem_net.y(s_idx) = w0(mb_idx, grid_idx, k, j, i);
-             grid_idx += 1;
-           }
+      // ----- Get all the loop limits and generate the parallel policy ------
+      // NOLINTNEXTLINE(whitespace/braces)
+      auto const [start_limit, end_limit] = LoopLimitsAllCells();
+      int const species_start_idx = chemistry_scalars_first_idx;
+      auto const policy = Kokkos::MDRangePolicy<Kokkos::Rank<4>>(
+          DevExeSpace(), start_limit, end_limit);
 
-           // ------ Solve the ODEs ------
-           ODE_Solver_t ode_solver(ode_settings, chem_net, t_start, dt);
-           ode_solver.SolveODE();
+      Kokkos::parallel_for(
+          "Chemistry_ODE_Solve", policy,
+          KOKKOS_LAMBDA(const int& mb_idx, const int& k, const int& j,
+                        const int& i) {
+            // Create the chemisty object
+            Network_t chem_net(network_settings, w0(mb_idx, IDN, k, j, i),
+                              density_cgs, mu_H_local, gamma, hydrogen_mass_cgs,
+                              time_cgs, energy_density_cgs);
 
-           // check if the ODE solver failed
-           if (ode_solver.failed) {
-             chemisty_ode_failure() = ode_solver.failed;
-           }
+            // ------ Load cell values ------
+            // Chemistry scalars. The loop is based off of the chemical
+            // network's number of equations since that's known at compile time,
+            // enabling more loop optimizations. The minus 1 is because internal
+            // energy occupies the last slot in the array
+            int grid_idx = species_start_idx;
+            for (int s_idx = 0; s_idx < Network_t::neqs - 1; s_idx++) {
+              chem_net.y(s_idx) = w0(mb_idx, grid_idx, k, j, i);
+              grid_idx += 1;
+            }
 
-           // ------ Write cell values back out ------
-           // Write the values back out
-           int grid_idx = species_start_idx;
-           for (int s_idx = 0; s_idx < Network_t::neqs; s_idx++) {
-             w0(mb_idx, grid_idx, k, j, i) = chem_net.y(s_idx);
-             grid_idx += 1;
-           }
-         });
+            // Load internal energy
+            chem_net.y(Network_t::IIE) = w0(mb_idx, IEN, k, j, i);
 
-     // Get the failure flag and check for failure
-     bool chemisty_ode_failure_h;
-     Kokkos::deep_copy(chemisty_ode_failure_h, chemisty_ode_failure);
-     if (chemisty_ode_failure_h) {
-       std::cerr << "The ODE solver failed to converge." << std::endl;
-     }
-   }
+            // ------ Solve the ODEs ------
+            ODE_Solver_t ode_solver(ode_settings, chem_net, t_start, dt);
+            // ode_solvers::KokkosBDF solver(chem_net, t_start, dt);
+            ode_solver.SolveODE();
+
+            // ------ Write cell values back out ------
+            // Chemistry scalars
+            grid_idx = species_start_idx;
+            for (int s_idx = 0; s_idx < Network_t::neqs - 1; s_idx++) {
+              w0(mb_idx, grid_idx, k, j, i) = chem_net.y(s_idx);
+              grid_idx += 1;
+            }
+
+            // Write internal energy
+            w0(mb_idx, IEN, k, j, i) = chem_net.y(Network_t::IIE);
+          });
+      }
