@@ -255,8 +255,8 @@ Interpolated spherical grid
 ---------------------------
 
 AthenaK can interpolate data to a latitude/longitude spherical grid and save it to a
-``.vtk`` file. The user can either interpolate onto a single radius or a list of radii. 
-This allows merging multiple output blocks for the same variable at different radii into 
+``.vtk`` file. The user can either interpolate onto a shell at a single radius or a list of radii. 
+The latter allows merging multiple output blocks for the same variable at different radii into 
 a single output block. For a single radius we can add the following block:
 
 .. code-block:: text
