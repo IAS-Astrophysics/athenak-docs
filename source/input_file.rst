@@ -116,6 +116,7 @@ The parameters for these blocks are documented with the physics or problem that 
   see :doc:`smr` and :doc:`amr`
 - ``<problem>`` — problem-specific parameters read by the problem generator; see
   :doc:`problem_generators`
+- ``<chemistry>`` - chemical evolution; see :doc:`chemistry`
 
 Changes from Athena++
 ---------------------

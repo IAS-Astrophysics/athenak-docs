@@ -59,6 +59,7 @@ AMR framework and Physics solvers.
    dyngrmhd
    dyngrmhd_eos
    particles
+   chemistry
 
 .. toctree::
    :caption: Other Features
@@ -67,6 +68,7 @@ AMR framework and Physics solvers.
    shearing_box
    units
    autotest
+   ode_solvers
 
 .. toctree::
    :caption: Help
