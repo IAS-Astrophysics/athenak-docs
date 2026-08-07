@@ -34,8 +34,60 @@ options as well as the code configuration is given by the ``-h`` switch:
      -n              parse input file and quit
      -c              show configuration and quit
      -m              output mesh structure and quit
+     -v              validate input parameters and quit
      -t hh:mm:ss     wall time limit for final output
+     -w ss           watchdog timeout in seconds
      -h              this help
+
+Validating an input file
+------------------------
+
+The ``-v`` switch builds a real ``Mesh``, ``ProblemGenerator``, and all requested
+physics modules from the input file -- exercising every parameter read, the
+initial-data setup, and (if used) the EOS table -- and then exits before the evolution
+loop starts. To keep this cheap, the root grid is collapsed to a single MeshBlock and
+mesh refinement is disabled, regardless of what the input file specifies. This makes it
+a fast way to catch problems in an input file (missing parameters, bad values, EOS
+table issues, etc.) before submitting a full job to a cluster:
+
+.. code-block:: bash
+
+   athena -v -i example.athinput
+
+On every run, not just under ``-v``, AthenaK also checks (from rank 0, after all
+classes have been constructed) whether every parameter present in the input file was
+actually read by the code, and prints a warning to stderr for each one that was not,
+e.g.
+
+.. code-block:: text
+
+   ### WARNING in parameter_input.cpp: input parameter <hydro>/reconstuct = plm was not used by the code (check for a typo)
+
+This is a good way to catch typos in optional parameter names, which would otherwise be
+silently ignored. Note that under ``-v`` this check skips mesh-refinement-related
+blocks (``mesh_refinement``, ``refined_region``, ``amr_criterion``, ``z4c_amr``), since
+refinement is disabled in validation mode and those parameters are never read; use a
+full run to confirm refinement parameters are being consumed.
+
+Watchdog for hung jobs
+----------------------
+
+The ``-w ss`` switch starts a background "WatchDog" thread with a timeout of ``ss``
+seconds (a port of the WatchDog from the `Einstein Toolkit
+<https://bitbucket.org/cactuscode/cactusutils/src/master/WatchDog/>`_):
+
+.. code-block:: bash
+
+   athena -w 300 -i example.athinput
+
+Once the evolution loop starts, the watchdog checks for progress once per cycle. If a
+full timeout interval elapses without a cycle completing, it prints a message to stderr
+and aborts the run. This is useful for catching simulations that hang on a cluster
+(e.g., a deadlocked MPI collective): a hard abort lets a batch script or scheduler
+detect the failure and react (for example, resubmit), rather than the job silently
+idling until it exhausts its walltime allocation. Choose a timeout comfortably larger
+than the time needed for one cycle, accounting for occasional slower cycles such as
+those that write restart files or trigger AMR regridding, to avoid false positives.
 
 Overriding parameters in the input file
 ---------------------------------------
