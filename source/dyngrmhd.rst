@@ -195,12 +195,16 @@ Other parameters and physics options
   :math:`Wv^r = \frac{1}{2} U (3(r/R_\ast) - (r/R_\ast)^3)`, where :math:`R_\ast` is the TOV
   radius in the appropriate coordinates.
 - ``p_pert``: magnitude :math:`P_\mathrm{pert}` of a random perturbation to the pressure.
+- ``bfield_type``: type of magnetic field seed (default: pressure poloidal internal dipole
+  field; option: current-loop external dipole field).
 - ``b_norm``: magnitude of a poloidal magnetic field initialized with the vector potential
-  :math:`A_\phi = \max\{P-P_\mathrm{cut},0\}\times(1-\rho/\rho_c)^m`.
-- ``pcut``: pressure cutoff :math:`P_\mathrm{cut}` for the magnetic field.
+  :math:`A_\phi = \max\{P-P_\mathrm{cut},0\}\times(1-\rho/\rho_c)^m` (for internal dipole field).
+- ``pcut``: pressure cutoff :math:`P_\mathrm{cut}` for the magnetic field (for internal dipole field).
 - ``use_pcut_rel``: whether :math:`P_\mathrm{cut}` is an absolute cutoff (``false``, default)
-  or relative to the central pressure :math:`P_c`.
-- ``magindex``: exponent :math:`m` for the magnetic field.
+  or relative to the central pressure :math:`P_c` (for internal dipole field).
+- ``magindex``: exponent :math:`m` for the magnetic field (for internal dipole field).
+- ``b_max``: magnitude of the magnetic field in Gauss (for external dipole field).
+- ``r_0_current``: radius of the current loop in code units (for external dipole field).
 
 The TOV solver is independent of the problem generator and available via
 ``utils/tov/tov.hpp``, so it is also possible to write your own problem generator using the
