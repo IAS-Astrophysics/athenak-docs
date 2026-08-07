@@ -196,7 +196,7 @@ Other parameters and physics options
   radius in the appropriate coordinates.
 - ``p_pert``: magnitude :math:`P_\mathrm{pert}` of a random perturbation to the pressure.
 - ``bfield_type``: type of magnetic field seed (default: pressure poloidal internal dipole
-  field; option: current-loop external dipole field).
+  field ``pressure_poloidal``; option: current-loop external dipole field ``current_loop``).
 - ``b_norm``: magnitude of a poloidal magnetic field initialized with the vector potential
   :math:`A_\phi = \max\{P-P_\mathrm{cut},0\}\times(1-\rho/\rho_c)^m` (for internal dipole field).
 - ``pcut``: pressure cutoff :math:`P_\mathrm{cut}` for the magnetic field (for internal dipole field).
