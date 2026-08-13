@@ -292,7 +292,27 @@ A more convenient way is to specify a range of radii:
   nradii    = 100
   r_spacing = log # linear
 
-The user can choose between log- or linear-spacing.
+The user can choose between log- or linear-spacing. Additionally, the user can specify
+how the angular grid should be structured. For that a few options are available:
+
+.. code-block:: text
+
+   <output6>
+   file_type = sph
+   ...
+   ntheta          = 128
+   nphi            = 256
+   theta_spacing   = uniform_costheta # default; option: uniform_theta
+   theta_centering = node             # default; option: cell
+   weights         = true             # default
+
+By default, the user only has to set ``ntheta`` and it will compute ``nphi=2*ntheta`` by default.
+If the user wants to specify ``nphi``, i.e. the number of points in phi, manually this parameter has
+to be set. The grid in theta by default is sampled in the cosine of theta, but there is the option
+to just have a uniform grid in theta with the parameter ``theta_spacing``.
+By default the theta grid is node-centered, i.e. the points at the poles fall onto the z-axis,
+but there is an option to use a cell-centered grid in theta with ``theta_centering``. Lastly, by default the weights
+are dumped to the .vtk files which can be disabled with the ``weights`` flag.
 
 Interpolated cartesian grid
 ---------------------------
