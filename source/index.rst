@@ -43,6 +43,7 @@ AMR framework and Physics solvers.
    uniform_mesh
    smr
    amr
+   cyclic_zoom
    problem_generators
 
 .. toctree::
