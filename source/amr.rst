@@ -61,6 +61,9 @@ The ``method`` parameter can take the following arguments:
 - ``location``: refine a cube centered on the specified location with a given side
   half-length. This is useful if part of the mesh should always be refined independent
   of the refinement criteria.
+- ``cyclic_zoom``: cycle between refining and coarsening a spherical region, storing
+  fine-grid data so small-scale structure can be restored on zoom-in. See
+  :doc:`cyclic_zoom`.
 - ``user``: refine based on a user-specified refinement criterion in the problem
   generator (see :ref:`custom-refinement-criteria`).
 
@@ -194,6 +197,23 @@ Input baselines:
      job/basename=z4c_amr_smoke \
      time/tlim=5.0
 
+Cyclic zoom
+^^^^^^^^^^^
+
+Input baselines:
+
+- ``inputs/zoom/zoom_bondi.athinput``
+- ``inputs/zoom/zoom_monopole.athinput``
+
+See :doc:`cyclic_zoom` for parameters, supported physics, and limitations.
+
+.. code-block:: bash
+
+   ./build/src/athena \
+     -i inputs/zoom/zoom_bondi.athinput \
+     job/basename=zoom_bondi \
+     time/tlim=100.0
+
 Tuning checklist
 ----------------
 
@@ -208,3 +228,5 @@ Representative AMR inputs
 - ``inputs/tests/linear_wave_hydro_amr.athinput``
 - ``inputs/hydro/blast_hydro_amr.athinput``
 - ``inputs/mhd/blast_mhd_amr.athinput``
+- ``inputs/zoom/zoom_bondi.athinput``
+- ``inputs/zoom/zoom_monopole.athinput``

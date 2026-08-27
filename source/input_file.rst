@@ -114,6 +114,8 @@ The parameters for these blocks are documented with the physics or problem that 
 - ``<coord>`` — coordinate system (e.g. black-hole spin for GR)
 - ``<mesh_refinement>``, ``<refined_region#>``, ``<amr_criterion#>`` — mesh refinement;
   see :doc:`smr` and :doc:`amr`
+- ``<cyclic_zoom>`` — optional flags for cyclic zoom (verbosity, restart, memory caps);
+  most zoom parameters live in the ``<amr_criterion#>`` block; see :doc:`cyclic_zoom`
 - ``<problem>`` — problem-specific parameters read by the problem generator; see
   :doc:`problem_generators`
 
