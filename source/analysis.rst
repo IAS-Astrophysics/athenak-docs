@@ -120,6 +120,10 @@ This will glob all ``*.bin`` files with the stem ``tov.mhd_w_bcc``, such as
 ``tov.mhd_w_bcc.00000.bin``, ``tov.mhd_w_bcc.00001.bin``, etc., and write out the
 corresponding ``.athdf`` and ``.athdf.xmdf`` files.
 
+The converter uses the coordinates stored for the actual output cells, including
+slices, ghost cells, and singleton dimensions. A sliced axis retains its sampled cell
+location in the converted file.
+
 AthenaK-compatible libraries and tools
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 

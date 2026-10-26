@@ -103,6 +103,10 @@ Use ``-DPROBLEM=<dir/name>`` to compile a specific problem generator file from
 ``src/pgen/dir``. Built-in test problem generators in ``src/pgen/tests`` are compiled
 by default.
 
+The ``id_solve`` initial-data reader requires the HDF5 C development library. CMake
+finds and links HDF5 when configuring with ``-DPROBLEM=z4c/id_solve``. See
+:doc:`numerical_relativity` for the input file and dataset format.
+
 Build outputs
 -------------
 

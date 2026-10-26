@@ -97,6 +97,11 @@ among the most commonly used:
 - ``hydro_u`` or ``mhd_u``: conserved hydrodynamical variables for the specified fluid
   module, including any weighting by the volume form (i.e., they are densitized)
 - ``hydro_w`` or ``mhd_w``: primitive hydrodynamical variables
+- ``z4c``, ``adm``, ``con``, or ``weyl``: spacetime variables, constraints, or Weyl
+  scalars (see :doc:`numerical_relativity`)
+- ``z4c_diag``: vacuum curvature diagnostics, including electric and magnetic Weyl
+  tensors, the super-Poynting vector and its physical norm, and the Kretschmann scalar.
+  Individual components can also be selected; see :doc:`numerical_relativity`.
 
 Sliced grid dumps
 -----------------
@@ -194,6 +199,11 @@ restart will take precedence over the parameters in the restart file:
 Note that while it is possible to update parameters in existing physics modules this way,
 adding or subtracting physics during restarts via a new parameter file is not directly
 supported at this time.
+
+For Z4c runs, restart files also preserve horizon and CCE output cadence and the full
+drift-controller history. Tracker and controller logs append on restart. The additional
+telegraph lapse fields change the Z4c checkpoint layout, including when the gauge is
+disabled; see :doc:`numerical_relativity` for compatibility details.
 
 History outputs
 ---------------
@@ -314,10 +324,48 @@ By default the theta grid is node-centered, i.e. the points at the poles fall on
 but there is an option to use a cell-centered grid in theta with ``theta_centering``. Lastly, by default the weights 
 are dumped to the .vtk files which can be disabled with the ``weights`` flag.
 
-Interpolated cartesian grid
+Interpolated Cartesian grid
 ---------------------------
 
-TODO
+The ``cart`` output interpolates grid variables onto a Cartesian grid centered at a
+chosen point. For example,
+
+.. code-block:: text
+
+   <output7>
+   file_type = cart
+   variable = adm
+   dt = 1.0
+   center_x = 0.0
+   center_y = 0.0
+   center_z = 0.0
+   extent_x = 2.0
+   extent_y = 2.0
+   extent_z = 2.0
+   numpoints_x = 32
+   numpoints_y = 32
+   numpoints_z = 32
+   chebyshev = false
+
+The ``center_x``, ``center_y``, and ``center_z`` parameters set the grid center
+(default: ``0.0``). The positive ``extent_x``, ``extent_y``, and ``extent_z`` values
+are half-widths (default: ``2.0``), and ``numpoints_x``, ``numpoints_y``, and
+``numpoints_z`` give the number of points on each axis, including endpoints (default:
+``32``, minimum: ``2``).
+
+By default, the points are uniformly spaced from center minus half-width to center plus
+half-width. Setting ``chebyshev = true`` uses Chebyshev-Lobatto points,
+:math:`x_q=x_c+R_x\cos(q\pi/(N_x-1))`, and similarly for the other axes.
+
+Files are written to ``cart/<basename>.<id>.<number>.bin``. They contain grid metadata,
+variable labels, and single-precision field values with :math:`x` varying fastest.
+This format differs from the mesh ``bin`` output. Both Cartesian and spherical
+interpolation assign a point on a shared MeshBlock face to a single block, including
+across MPI ranks. The outer domain face remains included, and interpolation indices
+and weights are refreshed after AMR changes.
+
+For Cartesian dumps following compact objects, see the horizon data dump controls in
+:doc:`numerical_relativity`.
 
 Coarsened grids
 ---------------
