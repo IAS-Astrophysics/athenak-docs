@@ -71,6 +71,17 @@ a few new ``<mhd>`` parameters available for the Valencia solver:
 - ``mhd/dmp_M``: the constant :math:`M \ge 1` for the relaxed DMP above; this sets the
   permitted range without enabling FOFC to :math:`A\in [A_\mathrm{min}/M, M A_\mathrm{max}]`,
   where :math:`A\in\{\tilde{D},\tilde{\tau}\}`.
+- ``mhd/aggressive_floor``: by default (``true``), the ``reset_floor`` policy floors all
+  primitive variables when the density (primitive or conserved) falls below atmosphere. If
+  set to ``false``, only the density is floored. This can be important in some accretion
+  disk scenarios.
+- ``mhd/rsolver = hlld`` and ``hlle_transform``: In addition to the LLF and HLLE
+  solvers available in the other relativistic solvers, DynGRMHD also has an HLLD solver
+  via a locally flat frame transformation. There is also a second HLLE solver
+  (``hlle_transform``) which uses this same frame transformation.
+- ``mhd/monitor_failures``: a Boolean parameter (``false`` by default) which records the
+  number of times the HLLD iterative solve fails and falls back to HLLE. This is printed
+  out at the end of the run.
 
 If only the ``<adm>`` block is present, DynGRMHD is enabled but the spacetime is not
 evolved, making it possible to do GRMHD in a fixed but otherwise generic spacetime as
