@@ -58,7 +58,7 @@ Radiation input file parameters
 - ``<radiation>/angular_fluxes``: (default: true) flag to potentially disable angular fluxes
   (see **Minkowski space**)
 - ``<radiation>/reconstruct``: (default: ``plm``) set radiation spatial reconstruction
-  algorithm (options: ``dc``, ``ppm4``, ``ppmx``, ``wenoz``)
+  algorithm (options: ``dc``, ``plm``, ``ppm4``, ``ppmx``, ``wenoz``, ``teno``)
 - ``<radiation>/rad_source``: (default: true) enables radiation source term (see **Coupling**)
 - ``<radiation>/fixed_fluid``: (default: false) if true, solve transport problem without
   evolving (magneto)hydrodynamics (see **Coupling**)
@@ -73,12 +73,16 @@ Radiation input file parameters
 - ``<radiation>/kappa_a``: (mandatory if ``<radiation>/rad_source=true`` and
   ``<radiation>/power_opacity=false``) absorption opacity in code units (or cgs units if
   ``<units>`` included) (see **Coupling** and **Radiation units**)
+- ``<radiation>/kappa_p``: (mandatory if ``<radiation>/rad_source=true`` and
+  ``<radiation>/power_opacity=false``) difference between the Planck and Rosseland mean
+  absorption opacities, in the same units as ``kappa_a``
 - ``<radiation>/power_opacity``: (default: false) enable Kramer's type absorption opacity (see
   **Coupling** and **Radiation units**)
-- ``<radiation>/beam_source``: (default: false) flag to enable allocation of beam mask, for use
-  with radiation beam source (see **Beam source**)
-- ``<radiation>/dii_dt``: (mandatory if ``<radiation>/beam_source``) dI/dt for angular bins
-  flagged in beam mask (see **Beam source**)
+- ``<rad_srcterms>/rad_beam``: (default: false) enable the radiation beam source term (see
+  **Radiation beams**)
+- ``<rad_srcterms>/dii_dt``, ``pos_1``, ``pos_2``, ``pos_3``, ``dir_1``, ``dir_2``,
+  ``dir_3``, ``width``, ``spread``: (mandatory if ``<rad_srcterms>/rad_beam=true``) beam
+  parameters (see **Radiation beams**)
 
 Intensities and frames
 ----------------------
@@ -289,14 +293,11 @@ Accordingly, ``<radiation>/kappa_s`` and ``<radiation>/kappa_a`` (if
 Radiation beams
 ---------------
 
-A common test problem is to send off beams of radiation in a given spacetime. When
-``<radiation>/beam_source=true`` is specified in the input file, an additional
-
-- ``DvceArray5D<bool> beam_mask``: cell-centered intensity mask, shape/size: (m, n, k, j, i)
-
-is allocated. In a problem generator, one can set specific angles in the boolean mask to
-``true`` in order to illuminate that bin. For example, one might wish to set up a flashlight
-beam with a given spatial width and finite opening angle in either flat space or about a
-(spinning) black hole. The boolean mask is referenced in a source term update (not to be
-confused with the radiation coupling source term) which updates the intensity in the triggered
-angular bins by ``<radiation>/dii_dt`` over a numerical time step.
+A common test problem is to send off beams of radiation in a given spacetime, e.g., a
+flashlight beam with a given spatial width and finite opening angle in either flat space or
+about a (spinning) black hole. When ``rad_beam=true`` is specified in the ``<rad_srcterms>``
+block, a source term update (not to be confused with the radiation coupling source term)
+increases the intensity at the rate ``dii_dt`` in all cells within a proper distance
+``width/2`` of the point (``pos_1``, ``pos_2``, ``pos_3``) and in all angular bins within
+``spread/2`` degrees of the direction (``dir_1``, ``dir_2``, ``dir_3``). See
+``inputs/radiation/bh_beam.athinput`` for an example.

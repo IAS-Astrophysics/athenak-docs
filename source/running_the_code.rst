@@ -80,14 +80,16 @@ seconds (a port of the WatchDog from the `Einstein Toolkit
 
    athena -w 300 -i example.athinput
 
-Once the evolution loop starts, the watchdog checks for progress once per cycle. If a
-full timeout interval elapses without a cycle completing, it prints a message to stderr
+The watchdog starts just before the initial outputs are written and wakes up every ``ss``
+seconds, while the evolution loop signals progress once per cycle. If no new cycle has
+started since the previous check, the watchdog prints a message to stderr
 and aborts the run. This is useful for catching simulations that hang on a cluster
 (e.g., a deadlocked MPI collective): a hard abort lets a batch script or scheduler
 detect the failure and react (for example, resubmit), rather than the job silently
 idling until it exhausts its walltime allocation. Choose a timeout comfortably larger
 than the time needed for one cycle, accounting for occasional slower cycles such as
-those that write restart files or trigger AMR regridding, to avoid false positives.
+those that write restart files or trigger AMR regridding, as well as the initial and final
+outputs (during which no progress is signalled), to avoid false positives.
 
 Overriding parameters in the input file
 ---------------------------------------

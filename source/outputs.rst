@@ -7,7 +7,8 @@ output blocks must define the following parameters:
 
 - ``file_type``: the kind of output (e.g., full dumps, history files, restart files,
   etc.)
-- ``dt``: how frequently in code time to write this output
+- ``dt``: how frequently in code time to write this output (alternatively, ``dcycle``
+  sets the interval in cycles; if both are given, ``dcycle`` is used)
 
 Some output blocks also support an ``id`` parameter which can be used to choose the stem
 for the filename. This is useful if the same variable needs to be output in different
@@ -88,7 +89,7 @@ A full grid dump would be done as follows:
    file_type = bin # or vtk
    variable  = mhd_w_bcc # write the MHD primitive variables with cell-centered B-fields
    dt        = 100.0 # write out every 100.0 time units
-   id        = prim_3D # File stem; filename defaults to mhd_w_bcc.*.bin if not specified
+   id        = prim_3D # File stem; filename is <basename>.mhd_w_bcc.*.bin if not specified
 
 ``variable`` specifies which quantity (or quantities) to output. A full list of
 quantities is available in ``src/outputs/outputs.hpp``, but the following quantities are
@@ -114,7 +115,7 @@ A slice through the :math:`xy` plane at :math:`z=0` could be dumped using:
    variable  = adm # write the ADM variables
    dt        = 10.0 # write out every 10.0 time units
    slice_x3  = 0.0 # slice along z=0
-   id        = adm_xy # File stem; filename defaults to adm.*.bin if not specified
+   id        = adm_xy # File stem; filename is <basename>.adm.*.bin if not specified
 
 A line in the :math:`z` direction at :math:`x=0.5`, :math:`y=0.25` could be specified
 using:
@@ -129,10 +130,11 @@ using:
    slice_x2  = 0.25 # slice along y=0.25
 
 Note that no interpolation is done during slicing operations, so the actual data written
-to the output file is sourced from the nearest cell center to the left of the desired
-position, e.g., if there are cell centers at :math:`x=0.3` and :math:`x=0.55`, slicing
-through :math:`x=0.5` will return the cell at :math:`x=0.3`. This means that meshblocks
-sourced from different refinement levels will be output at slightly different points.
+to the output file is sourced from the cell that contains the desired position, e.g., if
+there are cell centers at :math:`x=0.3` and :math:`x=0.55` (with a face at
+:math:`x=0.425`), slicing through :math:`x=0.5` will return the cell at :math:`x=0.55`.
+This means that meshblocks sourced from different refinement levels will be output at
+slightly different points.
 
 Data can also be written to ASCII tables by setting ``file_type = tab``, but only in one
 dimension. Therefore, multidimensional grids must be sliced before outputting to
@@ -240,11 +242,12 @@ example,
    <output2>
    file_type = hst       # history output
    dt        = 10.0      # output interval
-   data_format = %20.15e # write out 15 significant digits
+   data_format = %20.15e # write out 16 significant digits
 
-will write 15 significant digits in scientific notation, using whitespace to ensure the
-string width is at least 20 characters. Formatting strings use C-style formatting
-specifiers, as in `printf <https://cplusplus.com/reference/cstdio/printf/>`_.
+will write 16 significant digits (15 after the decimal point) in scientific notation,
+using whitespace to ensure the string width is at least 20 characters. Formatting strings
+use C-style formatting specifiers, as in
+`printf <https://cplusplus.com/reference/cstdio/printf/>`_.
 
 PDF/histograms
 --------------

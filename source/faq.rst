@@ -145,5 +145,5 @@ There are one of three possibilities:
    supplied by the ``EOS`` object inside ``MHD``. Though the ``MHD`` object is available for
    ``DynGRMHD``, these functions are explicitly disabled because they are designed for the
    stationary GRMHD solver, which uses a different formulation of the GRMHD equations. Try
-   calling ``pdyngr->ConToPrim``, ``pdyngr->ConToPrimBC``, or ``pdyngr->ConToPrimInit``
+   calling ``pdyngr->ConToPrim``, ``pdyngr->ConToPrimBC``, or ``pdyngr->PrimToConInit``
    instead.

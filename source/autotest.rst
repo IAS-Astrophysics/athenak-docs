@@ -40,6 +40,12 @@ Command-line arguments
 The device flags (``--cpu``, ``--mpicpu``, ``--gpu``) can be combined. For example, passing
 both ``--cpu`` and ``--gpu`` runs the CPU tests and then the GPU tests sequentially.
 
+Each device flag can be followed by extra CMake options for that build. These must be
+passed as a single quoted string, e.g.
+``--gpu "-DKokkos_ARCH_AMPERE80=On -DCMAKE_CXX_COMPILER=<path>/nvcc_wrapper"``; an unquoted
+``-D...`` argument is rejected by the argument parser. A single option can also be passed
+as ``--cpu=-DOPTION=VALUE``.
+
 Test type selection with ``--test``
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -69,16 +75,16 @@ Example commands
    python run_test_suite.py --style
 
    # Run CPU tests
-   python run_test_suite.py --cpu <cpu_flags>
+   python run_test_suite.py --cpu "<cpu_flags>"
 
    # Run MPI+CPU tests
-   python run_test_suite.py --mpicpu <mpicpu_flags>
+   python run_test_suite.py --mpicpu "<mpicpu_flags>"
 
    # Run GPU tests
-   python run_test_suite.py --gpu <gpu_flags>
+   python run_test_suite.py --gpu "<gpu_flags>"
 
    # Run multiple test types at once (CPU then GPU, sequentially)
-   python run_test_suite.py --gpu <gpu_flags> --cpu <cpu_flags>
+   python run_test_suite.py --gpu "<gpu_flags>" --cpu "<cpu_flags>"
 
    # Run a single test file
    python run_test_suite.py --test test_suite/subdirectory/test_example_cpu.py
@@ -90,13 +96,13 @@ Example commands
    python run_test_suite.py --test test_suite/nr test_suite/gr
 
    # Run only the CPU tests found in the given folders
-   python run_test_suite.py --test test_suite/nr test_suite/gr --cpu <cpu_flags>
+   python run_test_suite.py --test test_suite/nr test_suite/gr --cpu "<cpu_flags>"
 
    # Run the CPU and GPU tests in a folder
-   python run_test_suite.py --test test_suite/subdirectory --gpu <gpu_flags> --cpu <cpu_flags>
+   python run_test_suite.py --test test_suite/subdirectory --gpu "<gpu_flags>" --cpu "<cpu_flags>"
 
    # Mix files and folders, restricted to CPU tests
-   python run_test_suite.py --test test_suite/subdirectory/test_example_cpu.py test_suite/subdirectory_2 --cpu <cpu_flags>
+   python run_test_suite.py --test test_suite/subdirectory/test_example_cpu.py test_suite/subdirectory_2 --cpu "<cpu_flags>"
 
 Behavior
 --------

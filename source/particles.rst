@@ -59,7 +59,7 @@ a good exercise of the particle infrastructure. AthenaK ships an input file at
 
 .. code-block:: bash
 
-   cmake -B build -DPROBLEM=part_random
+   cmake -B build -DPROBLEM=particles/part_random
    cmake --build build -j
 
 **2. Note the particle block:**

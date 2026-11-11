@@ -20,8 +20,8 @@ executable:
    cmake -B build
    cmake --build build -j
 
-This produces the executable ``build/src/athena``. (For an optimized release build, GPU
-builds, and architecture-specific flags, see :doc:`build`.)
+This produces the executable ``build/src/athena`` (an optimized ``Release`` build by
+default). (For GPU builds and architecture-specific flags, see :doc:`build`.)
 
 Step 2: Look at the input file (optional)
 -----------------------------------------
@@ -70,7 +70,8 @@ Run the executable, pointing it at the input file:
 AthenaK prints cycle/time diagnostics to the screen and, by default, writes outputs
 into the current directory. The ``tab`` outputs land in a ``tab/`` subdirectory as
 ``Sod.hydro_w.00000.tab`` through ``Sod.hydro_w.00025.tab`` (26 snapshots, one every
-``dt = 0.01`` up to ``tlim = 0.25``), and the history file appears under ``hst/``.
+``dt = 0.01`` up to ``tlim = 0.25``), and the history file ``Sod.hydro.hst`` is written
+directly to the current directory.
 
 Step 4: Visualize the result
 ----------------------------
@@ -100,8 +101,10 @@ Next steps
 ----------
 
 - Try a multidimensional problem, such as ``inputs/hydro/blast_hydro.athinput`` or
-  ``inputs/hydro/kh2d-sin.athinput``, and visualize the ``.bin`` output with
-  ``vis/python/plot_slice.py``.
+  ``inputs/hydro/kh2d-sin.athinput``. These use custom problem generators, so rebuild with
+  ``-DPROBLEM=fluids/blast`` or ``-DPROBLEM=fluids/kh`` (see :doc:`problem_generators`).
+  They write ``.vtk`` output; to visualize the data with ``vis/python/plot_slice.py``, set
+  ``file_type = bin`` in the corresponding output block.
 - Override parameters on the command line, e.g. increase the resolution with
   ``mesh/nx1=512`` or change the Riemann solver with ``hydro/rsolver=hllc``.
 - Read :doc:`running_the_code` for the full reference on running the code, outputs, and analysis.

@@ -82,10 +82,13 @@ Use these CMake options as needed:
 - ``-DAthena_ENABLE_MPI=ON``: enable MPI parallelism
 - ``-DAthena_ENABLE_OPENMP=ON``: enable OpenMP parallelism
 - ``-DAthena_SINGLE_PRECISION=ON``: build in single precision
-- ``-DAthena_ENABLE_RNS=ON``: enable RNS (rotating neutron star) support
 - ``-DPROBLEM=<dir/name>``: select a custom problem generator in ``src/pgen/dir``
   (defaults to ``built_in_pgens``)
 - ``-DCMAKE_CXX_FLAGS="..."``: append custom compiler flags
+
+There is no separate option for RNS (rotating neutron star) support: CMake links the RNSC
+library from ``rnsc/`` automatically when ``-DPROBLEM`` selects a problem generator under
+``dyn_grmhd/rns/``.
 
 Example with MPI + OpenMP:
 

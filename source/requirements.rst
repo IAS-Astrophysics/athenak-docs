@@ -5,7 +5,7 @@ AthenaK is designed to keep external dependencies minimal ("hermetic builds").
 The **core requirements** are:
 
 - Kokkos Core library
-- CMake (3.10 or later in this repository)
+- CMake (3.16 or later, as required by the bundled Kokkos)
 - C++17 (or later) compliant compiler
 
 Kokkos is included as a git submodule in this repository, so a recursive clone is
