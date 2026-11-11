@@ -73,7 +73,7 @@ Consider the following example:
 
 .. code-block:: bash
 
-   python3 plot_tab.py -i tab/Sod.mhd_w_bcc.00000.tab \  # input file (stem if -n given)
+   python3 plot_tab.py -i tab/Sod.mhd_w_bcc.00000.tab \  # first input file (full name)
                        -v dens \                          # variable to plot
                        -n 51                              # number of frames to read
 
