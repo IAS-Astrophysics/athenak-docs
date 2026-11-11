@@ -264,7 +264,6 @@ Example input for a binary with BHaHAHA:
 
   <z4c>
   horizon_finder = bhahaha
-  nco = 2
   co_0_type = BH
   co_0_x = 5.0
   co_0_mass = 0.539
@@ -279,6 +278,9 @@ Example input for a binary with BHaHAHA:
   bah_mass_1 = 0.539
   bah_mass_2 = 1.0
   bah_dt = 1.0
+
+Note: the number of trackers is determined automatically by
+enumerating the number of tracker objects in the parfile starting from 0.
 
 Example inputs for the finders are in
 ``inputs/z4c/onepuncture/z4c_onepuncture_ahf.athinput``,
