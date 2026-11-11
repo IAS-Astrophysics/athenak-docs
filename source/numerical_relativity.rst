@@ -117,6 +117,176 @@ module.
 
   Instructions on performing CCE output are forthcoming.
 
+Apparent horizon finding
+------------------------
+
+AthenaK provides two apparent horizon finders that share a common interface: the
+fast-flow finder (``fastflow``) and `BHaHAHA <https://arxiv.org/abs/2505.15912>`_
+(``bhahaha``). Both are always compiled. The finder is selected at runtime with
+the following parameter in the ``<z4c>`` block:
+
+- ``horizon_finder``: ``none``, ``fastflow``, or ``bhahaha`` (default: ``none``)
+
+Each finder reads its parameters from its own input block (``<fastflow>`` or
+``<bhahaha>``). The other block is ignored. Horizons found by either finder can be used
+for horizon-based excision by setting ``excision_scheme = horizon`` in ``<coord>``.
+The excision radius is the minimum horizon radius times ``horizon_factor`` (default:
+``1.0``).
+
+Fast-flow
+~~~~~~~~~
+
+The fast-flow finder expands the horizon surface in spherical harmonics up to ``lmax``
+and evaluates it on a Gauss-Legendre grid. Parameters ending in ``_?`` are set per
+horizon (zero-indexed). The main parameters are:
+
+- ``num_horizons``: Number of horizons to search for (default: ``1``)
+
+- ``npunct``: Number of punctures (default: ``0``)
+
+- ``ntheta``: Number of points in :math:`\theta`, with :math:`n_\phi = 2 n_\theta`
+  (default: ``5``)
+
+- ``lmax``: Maximum multipole of the shape expansion (default: ``4``)
+
+- ``use_puncture_?``: Center the initial guess on this puncture, or ``-1`` to use
+  ``center_[xyz]_?`` (default: ``-1``)
+
+- ``center_x_?``, ``center_y_?``, ``center_z_?``: Fixed center of the initial guess
+  (default: ``0.0``)
+
+- ``initial_radius_?``: Radius of the initial guess sphere (default: ``1.0``)
+
+- ``start_time_?``, ``stop_time_?``: Time window in which horizon ``?`` is searched for
+
+- ``flow_iterations_?``: Maximum number of flow iterations (default: ``100``)
+
+- ``verbose``, ``output_ylm``, ``output_grid``: Extra diagnostic output (default:
+  ``false``)
+
+A surface counts as converged only when all of the following criteria hold at once.
+The spectral residual and the expansion RMS are the main criteria. The mass change is
+a loose secondary check.
+
+- ``spec_tol_?``: Bound on the spectral residual
+  :math:`\|\nabla a\| / \|a\|`, where :math:`a` are the
+  :math:`Y_{\ell m}` coefficients and :math:`\nabla a` is their flow update
+  (default: ``1e-5``)
+
+- ``hrms_tol_?``: Bound on the RMS of the expansion :math:`H` times the
+  horizon mass, :math:`H_\mathrm{rms} M` (default: ``1e-1``)
+
+- ``hrms_rel_tol_?``: Bound on the relative change of :math:`H_\mathrm{rms}` between
+  iterations. The check is skipped once :math:`H_\mathrm{rms} M` <
+  ``hrms_rel_skip_?`` (default: ``1e-3``, ``1e-4``)
+
+- ``mass_tol_?``: Bound on the change of the irreducible mass between iterations
+  (default: ``1e-3``)
+
+- ``hmean_max_?``: The search is aborted if :math:`|\bar{H}|` exceeds this value
+  (default: ``100``)
+
+The following parameters control robustness:
+
+- ``step_rule_?``: Step-size rule for the flow, either ``fixed``, ``monotone`` (grow by
+  ``alpha_grow_?`` while the spectral residual decreases, otherwise shrink by
+  ``alpha_shrink_?``), ``bb1``, or ``bb2`` (Barzilai-Borwein). The step is clamped to
+  [``alpha_min_?``, ``alpha_max_?``] (default: ``monotone``)
+
+- ``stagnation_detect_?``: Abort when neither :math:`H_\mathrm{rms}` nor the spectral
+  residual improves by ``stagnation_improvement_frac_?`` within
+  ``stagnation_window_?`` iterations (default: ``true``)
+
+- ``auto_retry_?``, ``max_retries_?``: After a failed search, retry with the initial
+  radius scaled by ``retry_shrink_?`` or ``retry_grow_?``. The sign of the mean
+  expansion decides which of the two is used (default: ``true``, ``5``)
+
+- ``mode_ramp_lmin_?``: Start the flow with modes up to this :math:`\ell`, then add
+  modes gradually up to ``lmax``. A value of ``-1`` disables the ramp (default: ``-1``)
+
+Once a horizon has been found, its shape is the initial guess for the next search, and
+it is stored in restart files.
+
+Results are written to ``<basename>.horizon_summary_?.txt`` and
+``<basename>.horizon_shape_?.txt``.
+
+BHaHAHA
+~~~~~~~
+
+BHaHAHA uses a hyperbolic relaxation method on a spherical grid. Its initial guess is
+centered on the compact object trackers (``co_?`` in ``<z4c>``), so ``bah_num_horizons``
+must equal the number of trackers. The exception is BBH mode, which uses 3 horizons
+for 2 trackers. Once a horizon has been found, BHaHAHA extrapolates the center from
+earlier finds. The main parameters are:
+
+- ``bah_num_horizons``: Number of horizons to search for (default: ``1``)
+
+- ``bah_mass_?``: Mass estimate of horizon ``?``. This sets the scale of the initial
+  guess and the tolerances (default: ``1.0``)
+
+- ``bah_max_search_radius``: Maximum search radius (default: ``2``)
+
+- ``bah_find_every``: Search every this many cycles (default: ``1``)
+
+- ``bah_dt``: Search every ``bah_dt`` in code time. If ``> 0``, this overrides
+  ``bah_find_every`` (default: ``0.0``)
+
+- ``bah_Nr_interp``, ``bah_Ntheta``, ``bah_Nphi``: Radial and angular resolution of the
+  interpolation grid (default: ``48``, ``32``, ``64``)
+
+- ``bah_num_resolutions_multigrid``: Number of multigrid levels. Set the resolution of
+  each level ``i`` with ``bah_Ntheta_array_multigrid_i`` and
+  ``bah_Nphi_array_multigrid_i`` (default: ``1``)
+
+- ``bah_Theta_Linf_tol``, ``bah_Theta_L2_tol``: Convergence tolerances on the expansion
+  :math:`\Theta` times :math:`M` (default: ``1e-2``, ``2e-5``)
+
+- ``bah_max_itr``: Maximum number of iterations (default: ``10000``)
+
+- ``bah_BBH_mode_enable``: Enable BBH mode. This requires ``bah_num_horizons = 3``.
+  Horizons ``bah_BBH_mode_inspiral_BH_idxs_0`` and ``_1`` (default: ``0``, ``1``) are
+  the individual horizons. Horizon ``bah_BBH_mode_common_horizon_idx`` (default: ``2``)
+  is the common horizon, which is searched for only once the two black holes are close
+  (default: ``false``)
+
+- ``bah_eta_varying_common_horizon``: Use the varying-:math:`\eta` algorithm for the
+  common horizon (default: ``false``)
+
+- ``bah_verbosity``: Verbosity level, with timing output if ``> 0`` (default: ``0``)
+
+Diagnostics are written to ``horizon/BHaHAHA_diagnostics.ah?.gp``. Horizon shapes are
+written to ``horizon/h.t*.ah?.gp`` after every ``bah_output_shape_every`` finds
+(default: ``1``).
+
+Example input for a binary with BHaHAHA:
+
+.. code-block::
+
+  <z4c>
+  horizon_finder = bhahaha
+  co_0_type = BH
+  co_0_x = 5.0
+  co_0_mass = 0.539
+  co_1_type = BH
+  co_1_x = -5.0
+  co_1_mass = 0.539
+
+  <bhahaha>
+  bah_num_horizons = 3
+  bah_BBH_mode_enable = true
+  bah_mass_0 = 0.539
+  bah_mass_1 = 0.539
+  bah_mass_2 = 1.0
+  bah_dt = 1.0
+
+Note: the number of trackers is determined automatically by
+enumerating the number of tracker objects in the parfile starting from 0.
+
+Example inputs for the finders are in
+``inputs/z4c/onepuncture/z4c_onepuncture_ahf.athinput``,
+``inputs/z4c/onepuncture/z4c_onepuncture_spinning_ahf.athinput`` and
+``inputs/z4c/twopuncture/z4c_twopuncture_ahf.athinput``.
+
 Outputs
 -------
 
