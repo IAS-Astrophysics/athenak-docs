@@ -44,6 +44,7 @@ The problem generators dispatched in ``src/pgen/pgen.cpp`` are:
 - ``cpaw``
 - ``gr_bondi``
 - ``cshock``
+- ``divb_amr``
 - ``diffusion``
 - ``linear_wave``
 - ``implode``
@@ -56,6 +57,9 @@ The problem generators dispatched in ``src/pgen/pgen.cpp`` are:
 - ``shwave``
 - ``z4c_boosted_puncture``
 - ``z4c_linear_wave``
+- ``gravity``
+- ``binary_gravity``
+- ``be_collapse``
 
 In addition, two pre-defined unit-test problem generators are built in by default:
 
@@ -79,8 +83,8 @@ Common workflow
    cmake -B build
    cmake --build build -j
 
-   # Parse-only check for the chosen pgen
-   ./build/src/athena -i inputs/tests/linear_wave_hydro.athinput -n
+   # Validate the input file and the chosen pgen
+   ./build/src/athena -i inputs/tests/linear_wave_hydro.athinput -v
 
    # Run
    ./build/src/athena -i inputs/tests/linear_wave_hydro.athinput
@@ -90,4 +94,5 @@ Tips for custom pgens
 
 - Start from a nearby file in ``src/pgen/`` or ``src/pgen/tests/``.
 - Keep all run-time knobs in the ``<problem>`` block so users can override them easily.
-- Validate with ``-n`` (parse only) before launching long runs.
+- Validate with ``-v`` before launching long runs (``-n`` only parses the input file and
+  does not construct the problem generator).

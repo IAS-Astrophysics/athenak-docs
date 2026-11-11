@@ -209,17 +209,9 @@ frequently for updates. The most important items to note right now are:
 Building and compiling
 ^^^^^^^^^^^^^^^^^^^^^^^
 
-It is recommended to bump Kokkos to at least version 4.5.01 (2024-12-23), since SYCL
-support was promoted from Experimental in that previous minor version release. Assuming
-that the AthenaK repository clone has its submodules properly initialized, execute this
-once:
-
-.. code-block:: bash
-
-   cd ${athenak}
-   cd kokkos
-   git fetch
-   git checkout 4.5.01
+Kokkos 4.5.01 (2024-12-23) or later is recommended, since SYCL support was promoted from
+Experimental in that minor version release. The Kokkos submodule bundled with AthenaK is
+already newer (4.7.02), so no separate Kokkos checkout is needed.
 
 To build using ahead-of-time compilation (AOT compilation):
 
@@ -231,7 +223,7 @@ To build using ahead-of-time compilation (AOT compilation):
    cmake -DAthena_ENABLE_MPI=ON -DCMAKE_CXX_COMPILER=icpx -DKokkos_ENABLE_SERIAL=ON -DKokkos_ENABLE_SYCL=ON \
          -DKokkos_ARCH_INTEL_PVC=ON -DKokkos_ENABLE_OPENMP=ON \
          -DCMAKE_BUILD_TYPE=RelWithDebInfo -DCMAKE_INSTALL_PREFIX=${build} \
-         [-DPROBLEM=gr_torus] \
+         [-DPROBLEM=fluids/gr_torus] \
          -Bbuild
 
    cd ${build}
@@ -310,7 +302,7 @@ The simplest way to build and compile on Polaris is:
          -DCMAKE_BUILD_TYPE=RelWithDebInfo -DCMAKE_INSTALL_PREFIX=${build} \
          -DKokkos_ENABLE_AGGRESSIVE_VECTORIZATION=ON -DKokkos_ENABLE_CUDA_LAMBDA=ON \
          -DCMAKE_CXX_STANDARD=17 -DCMAKE_CXX_COMPILER=CC \
-         [-DPROBLEM=gr_torus] \
+         [-DPROBLEM=fluids/gr_torus] \
          -Bbuild
 
    cd ${build}
@@ -485,7 +477,7 @@ Building and compiling
    module load xpmem
    module load gpu/1.0
 
-   cd ${athena}
+   cd ${athenak}
    cmake -DAthena_ENABLE_MPI=ON -DKokkos_ENABLE_CUDA=On -DKokkos_ENABLE_CUDA_LAMBDA=ON \
          -DKokkos_ENABLE_IMPL_CUDA_MALLOC_ASYNC=OFF \
          -DKokkos_ARCH_AMPERE80=On -DKokkos_ARCH_ZEN3=ON \
@@ -826,7 +818,8 @@ Configuration and compilation
        -DKokkos_ENABLE_CUDA=On \
        -DKokkos_ARCH_AMPERE80=On \
        -DCMAKE_CXX_COMPILER=$PWD/../kokkos/bin/nvcc_wrapper \
-       -DPROBLEM=<problem>
+       -DPROBLEM=<problem> \
+       ..
 
 Example Slurm script
 ^^^^^^^^^^^^^^^^^^^^
