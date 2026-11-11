@@ -64,7 +64,7 @@ General blocks
   - ``variable`` (depends): variable(s) to be output (see :doc:`outputs`)
   - ``data_format`` (optional; used only for ``.tab`` and ``.hst``): format specifier
     string used for writing data (e.g. ``%12.5e``)
-  - ``id`` (optional): output ID used in file names (default = ``out[n]``)
+  - ``id`` (optional): output ID used in file names (default = the value of ``variable``)
   - ``slice_x?`` (optional): sliced output in orthogonal directions at the specified
     position (``? = 1, 2, or 3``)
   - ``ghost_zones`` (optional): include boundary ghost cells in output (default =
@@ -72,8 +72,9 @@ General blocks
 
 - ``<time>`` (**mandatory**): the CFL number and limit of the simulation
 
+  - ``evolution`` (**mandatory**): ``dynamic``, ``kinematic``, or ``static``
   - ``cfl_number`` (**mandatory**): the Courant, Friedrichs, & Lewy (CFL) Number
-  - ``nlim`` (**mandatory**): time step (cycle) limit (-1 = infinity)
+  - ``nlim`` (optional): time step (cycle) limit (default = -1, i.e., infinity)
   - ``tlim`` (**mandatory**): time limit in computing time
   - ``start_time`` (optional): time at the beginning of new simulation (default = 0)
   - ``integrator`` (optional): time-integration scheme (e.g. ``rk2`` [*default*],

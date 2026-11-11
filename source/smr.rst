@@ -9,8 +9,10 @@ Shared controls in ``<mesh_refinement>``
 ----------------------------------------
 
 - ``refinement``: ``static`` or ``adaptive``
-- ``num_levels``: number of refinement levels above the root grid
-- ``max_nmb_per_rank``: cap on the number of MeshBlocks per MPI rank
+- ``num_levels``: maximum number of levels including the root grid (``num_levels = 1``
+  means no refinement); read only for adaptive refinement
+- ``max_nmb_per_rank``: cap on the number of MeshBlocks per MPI rank; required for adaptive
+  refinement, not used for SMR
 
 For adaptive runs, ``refinement_interval`` additionally controls the AMR regrid cadence
 in cycles (see :doc:`amr`).

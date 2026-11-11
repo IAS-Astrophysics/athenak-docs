@@ -31,8 +31,8 @@ Core options in ``<hydro>``:
 - ``iso_sound_speed`` (**mandatory if** ``eos = isothermal``): isothermal sound speed.
 - ``reconstruct`` (default ``plm``): spatial reconstruction. Options: ``dc`` (donor cell),
   ``plm`` (piecewise linear), ``ppm4`` and ``ppmx`` (piecewise parabolic), ``wenoz``
-  (WENO-Z). The higher-order methods require more ghost zones (set ``<mesh>/nghost`` to at
-  least 3, or 4 when combined with ``fofc``).
+  (WENO-Z), ``teno`` (TENO). The higher-order methods require more ghost zones (set
+  ``<mesh>/nghost`` to at least 3, or 4 when combined with ``fofc``).
 - ``rsolver`` (**mandatory**): approximate Riemann solver. Valid choices depend on the
   regime:
 
@@ -50,7 +50,8 @@ Floors and ceilings (applied during the conserved-to-primitive inversion):
   floors.
 - ``gamma_max`` (SR/GR): Lorentz-factor ceiling.
 
-If present, ``viscosity`` and ``conductivity`` enable explicit dissipation (see
+If present, the viscosity (``nu_iso``, ``nu_aniso``) and thermal conduction
+(``alpha_iso``, ``alpha_aniso``, ``alpha_spitzer``) coefficients enable dissipation (see
 :doc:`diffusion`). Gravity, cooling, and other source terms live in a separate
 ``<hydro_srcterms>`` block (see :doc:`source_terms`).
 

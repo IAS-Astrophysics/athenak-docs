@@ -97,7 +97,7 @@ time):
 
 .. code-block:: bash
 
-   cmake -B build -DPROBLEM=rt
+   cmake -B build -DPROBLEM=fluids/rt
    cmake --build build -j
 
 **2. Inspect the source term.** In ``inputs/hydro/rt2d.athinput`` the gravity is switched on

@@ -25,8 +25,8 @@ The ``<mhd>`` block shares most of its parameters with ``<hydro>``:
 
 - ``eos`` (**mandatory**): ``ideal`` or ``isothermal``.
 - ``gamma`` / ``iso_sound_speed``: as for hydro (one is mandatory depending on ``eos``).
-- ``reconstruct`` (default ``plm``): ``dc``, ``plm``, ``ppm4``, ``ppmx``, or ``wenoz`` (the
-  higher-order options require more ghost zones).
+- ``reconstruct`` (default ``plm``): ``dc``, ``plm``, ``ppm4``, ``ppmx``, ``wenoz``, or
+  ``teno`` (the higher-order options require more ghost zones).
 - ``rsolver`` (**mandatory**): approximate Riemann solver. Valid choices:
 
   - Newtonian MHD: ``llf``, ``hlle``, ``hlld``
@@ -39,10 +39,10 @@ The ``<mhd>`` block shares most of its parameters with ``<hydro>``:
 
 MHD-specific options:
 
-- ``sigma_max`` (SR/GR): magnetization ceiling :math:`\sigma = b^2/(\rho h)` used in the
-  conserved-to-primitive floors.
-- ``ohmic_resistivity``: if present, enables Ohmic resistivity with the given coefficient (see
-  :doc:`diffusion`).
+- ``sigma_max`` (Newtonian, SR, and GR): magnetization ceiling, applied as a density floor
+  :math:`\propto b^2/\sigma_\mathrm{max}` in the conserved-to-primitive inversion.
+- ``eta_ohm`` (and ``eta_ad``): if present, enables Ohmic resistivity (and ambipolar
+  diffusion) with the given coefficient (see :doc:`diffusion`).
 
 The initial magnetic field itself is set by the problem generator. Source terms live in the
 separate ``<mhd_srcterms>`` block (see :doc:`source_terms`).

@@ -44,7 +44,7 @@ Notes
 - The ``/src/pgen/tests/shwave`` problem generator along with input files in the
   ``/inputs/shearing_box/`` directory can be used to run shearing wave (shwave) tests.
 
-- The ``/src/pgen/mri2d`` problem generator along with input files in the
+- The ``/src/pgen/fluids/mri2d`` problem generator along with input files in the
   ``/inputs/shearing_box/`` directory can be used to run 2D MRI simulations in the
   :math:`R\text{--}Z` plane. In 2D, only :math:`R\text{--}Z` coordinates have been
   implemented in the shearing box; 2D simulations in the :math:`R\text{--}\phi` plane are
@@ -75,5 +75,5 @@ Notes
 
 - For the reason above, viscosity is not yet implemented in the shearing box.
 
-- Neither AMR nor SMR have been tested with the shearing box, and except for very special
-  cases will almost certainly not work.
+- The shearing box cannot be used with SMR or AMR: AthenaK stops with a fatal error if a
+  ``<shearing_box>`` block is combined with mesh refinement.

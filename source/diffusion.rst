@@ -22,6 +22,15 @@ treated **explicitly**, they impose a diffusive stability limit on the time step
 where :math:`D` is the relevant diffusivity. For strongly diffusive problems this can dominate
 the cost, and the ideal (advective) CFL condition no longer sets the step.
 
+For Newtonian hydro and MHD, each process can instead be integrated with RKL2
+super-time-stepping (STS): set ``viscosity_integrator``, ``conductivity_integrator``, or
+``resistivity_integrator`` to ``sts`` (default ``explicit``) in the same block, and set
+``<time>/sts_integrator = rkl2``. Each setting requires the other. Processes integrated with
+STS no longer limit the time step; ``<time>/sts_max_dt_ratio`` (default ``-1``, no cap)
+optionally caps it at that multiple of their combined explicit diffusive step. STS is not
+available with special or general relativity (including dynamical-spacetime GRMHD),
+``<ion-neutral>``, ``<radiation>``, or the shearing box / orbital advection.
+
 Viscosity and thermal conduction can be added to either the ``<hydro>`` or the ``<mhd>`` block;
 resistivity is only meaningful for MHD and lives in the ``<mhd>`` block.
 

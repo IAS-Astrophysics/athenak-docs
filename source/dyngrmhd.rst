@@ -51,7 +51,7 @@ The Valencia solver can be enabled by starting with a standard GRMHD parfile and
 a few new ``<mhd>`` parameters available for the Valencia solver:
 
 - ``mhd/dyn_eos``: the PrimitiveSolver EOS (currently supports ``ideal`` for an ideal gas,
-  ``piecewise_poly`` for piecewise polytropes, and ``hybrid`` or ``eos_compose`` for a
+  ``piecewise_poly`` for piecewise polytropes, and ``hybrid`` or ``compose`` for a
   tabulated EOS in the PyCompOSE format). See :doc:`dyngrmhd_eos` for more information. Note
   that ``mhd/eos`` must still be defined as ``ideal`` no matter what ``dyn_eos`` is; this
   inconvenience is for historical reasons and will hopefully be patched in a future update.
@@ -66,8 +66,8 @@ a few new ``<mhd>`` parameters available for the Valencia solver:
   the density is reset to atmosphere when :math:`\rho < f_\mathrm{thr}\rho_\mathrm{atmo}`.
   Default is 1.0.
 - ``mhd/enforce_maximum``: use FOFC to enforce a relaxed discrete maximum principle (see
-  `arXiv:2409.10384 <https://arxiv.org/abs/2409.10384>`_). Not usually necessary, but can
-  improve stability in some circumstances.
+  `arXiv:2409.10384 <https://arxiv.org/abs/2409.10384>`_). Enabled by default (``true``);
+  it can improve stability in some circumstances.
 - ``mhd/dmp_M``: the constant :math:`M \ge 1` for the relaxed DMP above; this sets the
   permitted range without enabling FOFC to :math:`A\in [A_\mathrm{min}/M, M A_\mathrm{max}]`,
   where :math:`A\in\{\tilde{D},\tilde{\tau}\}`.
@@ -158,9 +158,9 @@ TOV problems
 
 A standard TOV neutron star (in either Cartesian Schwarzschild or isotropic coordinates) with
 an optional poloidal magnetic field is available via the problem generator
-``-DPROBLEM=dyngr_tov``. The solver uses the shooting method with an RK4 integrator to solve
-the TOV equations assuming a barotropic EOS based on the EOS defined by ``mhd/dyn_eos``. The
-parameters under ``<problem>`` are as follows.
+``-DPROBLEM=dyn_grmhd/dyngr_tov``. The solver uses the shooting method with an RK4
+integrator to solve the TOV equations assuming a barotropic EOS based on the EOS defined by
+``mhd/dyn_eos``. The parameters under ``<problem>`` are as follows.
 
 Integration parameters
 ~~~~~~~~~~~~~~~~~~~~~~~~
@@ -177,7 +177,7 @@ EOS parameters
 
 - ``kappa``: if ``mhd/dyn_eos = ideal``, the corresponding polytropic constant for an EOS of
   the form :math:`P = K\rho^\Gamma`, where :math:`\Gamma` is defined by ``mhd/gamma``.
-- ``table``: if using ``mhd/dyn_eos = eos_compose``, an appropriate 1D slice in the
+- ``table``: if using ``mhd/dyn_eos = compose``, an appropriate 1D slice in the
   `PyCompOSE <https://github.com/computationalrelativity/PyCompOSE>`_ format stored in a
   ``.athtab`` binary table.
 
@@ -208,7 +208,7 @@ Other parameters and physics options
 
 The TOV solver is independent of the problem generator and available via
 ``utils/tov/tov.hpp``, so it is also possible to write your own problem generator using the
-TOV solver. See ``pgen/dyngr_tov.cpp`` for an example on how to use it.
+TOV solver. See ``pgen/dyn_grmhd/dyngr_tov.cpp`` for an example on how to use it.
 
 BNS problems
 ------------
@@ -216,14 +216,15 @@ BNS problems
 AthenaK currently supports binary neutron star initial data made with `LORENE
 <https://lorene.obspm.fr/>`_, `sgrid <https://github.com/sgridsource/sgrid>`_, and `Elliptica
 <https://github.com/rashti-alireza/Elliptica_ID_Reader>`_. To compile, configure AthenaK
-appropriately for your system and set ``-DPROBLEM`` to ``lorene_bns``, ``sgrid_bns``, or
-``elliptica_bns``. To link against the correct initial data library, create a symbolic link
+appropriately for your system and set ``-DPROBLEM`` to ``dyn_grmhd/lorene/lorene_bns``,
+``dyn_grmhd/sgrid/sgrid_bns``, or ``dyn_grmhd/elliptica/elliptica``. To link against the
+correct initial data library, create a symbolic link
 (``ln -s <target> <link_name>``) in the repository base directory of AthenaK to the base
 directory for the initial data library and title it ``Lorene``, ``sgrid``, or
 ``Elliptica_ID_Reader``. CMake will automatically configure AthenaK to look for the correct
 headers and libraries inside these directories.
 
-Both ``lorene_bns`` and ``elliptica_bns`` expect a single parameter,
+Both ``lorene_bns`` and ``elliptica`` expect a single parameter,
 ``problem/initial_data_file``, which is the filename for the initial data.
 
 To use the compact object trackers with neutron stars, add the following lines to the
@@ -231,7 +232,6 @@ parameter file under ``<z4c>``:
 
 .. code-block:: text
 
-   nco = 2
    co_0_type = NS
    co_0_x = <x position of first star>
    co_0_y = <y position of first star>

@@ -30,7 +30,7 @@ An EOS of the form
      &= \left(\Gamma - 1\right)\rho \epsilon.
    \end{align}
 
-It can be enabled by setting ``mhd/eos_policy=ideal`` in the parameter file. The adiabatic
+It can be enabled by setting ``mhd/dyn_eos=ideal`` in the parameter file. The adiabatic
 index, :math:`\Gamma`, is set via ``mhd/gamma``. To ensure that the sound speed is physical,
 AthenaK enforces :math:`1 < \Gamma \leq 2`. This is the simplest and fastest EOS supported by
 ``DynGRMHD``, but it is not usually very physically accurate for most problems of interest.
@@ -55,7 +55,7 @@ internal energy at :math:`n_i`, :math:`\Gamma_i` is the polytropic index between
 :math:`n_{i-1}` and :math:`n_i`, and :math:`\Gamma_\mathrm{th}` is the adiabatic index for the
 thermal extension.
 
-Piecewise polytropes can be enabled by setting ``mhd/eos_policy=piecewise_poly`` and use the
+Piecewise polytropes can be enabled by setting ``mhd/dyn_eos=piecewise_poly`` and use the
 conventions in `RePrimAnd
 <https://wokast.github.io/RePrimAnd/eos_barotr_available.html#piecewise-polytropic-eos>`_. The
 following parameters must be defined:
@@ -67,7 +67,8 @@ following parameters must be defined:
 - ``mhd/pwp_gamma_pieces_<#>``: a zero-indexed polytropic index :math:`\Gamma_i`. It is
   incumbent on the user to ensure that :math:`\Gamma_i` cannot produce superluminal sound
   speeds over its density range.
-- ``mhd/gamma_thermal``: the thermal adiabatic index :math:`\Gamma_\mathrm{th}`.
+- ``mhd/gamma_thermal`` (optional, default 5/3): the thermal adiabatic index
+  :math:`\Gamma_\mathrm{th}`.
 
 :math:`P_i`, :math:`n_i`, and :math:`\epsilon_i` can be determined uniquely from these
 parameters. Note that there is a hard limit of seven total pieces fixed by a compile-time
@@ -85,7 +86,7 @@ An EOS determined by a lookup table. Any 1D or 3D EOS in the `CompOSE
 Hybrid EOS
 ~~~~~~~~~~
 
-A 1D hybrid EOS is enabled using ``mhd/eos_policy=hybrid``. It expects a table which is evenly
+A 1D hybrid EOS is enabled using ``mhd/dyn_eos=hybrid``. It expects a table which is evenly
 spaced in :math:`\log n` and extends it to finite temperatures with a thermal gamma law, as in
 the piecewise polytrope case. Thus it may be written as
 
@@ -104,7 +105,7 @@ which are interpolated from the table. The table file is supplied via the parame
 Full microphysical table
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-The 3D EOS is enabled with ``eos_policy=compose`` and takes a table which is evenly spaced in
+The 3D EOS is enabled with ``mhd/dyn_eos=compose`` and takes a table which is evenly spaced in
 :math:`\log n`, charge fraction :math:`Y_q`, and :math:`\log T`. Thermodynamic quantities are
 computed by performing lookup operations and linearly interpolating between the nearest points.
 The table file is supplied via the parameter ``mhd/table=<filename>``. The EOS will be as

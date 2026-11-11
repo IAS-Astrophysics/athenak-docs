@@ -52,8 +52,8 @@ Key parameters:
 - ``x1min``/``x1max`` (and the x2, x3 analogues): physical extent of the domain. Cell spacing
   is uniform, e.g. :math:`\Delta x_1 = (x1max - x1min)/nx1`.
 - ``nghost`` (default ``2``): number of ghost cells per face. Higher-order reconstruction needs
-  more: ``ppm4``/``ppmx`` require ``nghost >= 3`` and ``wenoz`` typically ``nghost >= 4``. With
-  SMR/AMR, ``nghost`` must be even.
+  more: ``ppm4``/``ppmx``/``wenoz``/``teno`` require ``nghost >= 3`` (``>= 4`` with
+  ``fofc``). With SMR/AMR, ``nghost`` must be even.
 - ``ix1_bc``/``ox1_bc`` (inner/outer boundary on each face): choose from ``periodic``,
   ``reflect``, ``outflow``, ``inflow``, ``diode``, ``vacuum``, ``shear_periodic`` (shearing
   box only), or ``user`` (defined by the problem generator). If either face of a direction is
