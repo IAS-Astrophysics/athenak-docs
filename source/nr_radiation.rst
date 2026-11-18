@@ -318,58 +318,22 @@ remove in one step, and is disabled by ``cfl_qrad = 0``:
 with :math:`C` the CFL number. The second is evaluated at the end of the transfer solve, so
 it bounds the very step its heating rate will be applied to.
 
-Verification: an emitting sphere
---------------------------------
+Verification
+------------
 
-A homogeneous sphere of radius :math:`R` with constant :math:`\sigma_a` and source
-:math:`S = b` in vacuum has an exact interior solution. Along a ray at
-:math:`\mu_r = \hat{n} \cdot \hat{r}` and radius :math:`r < R`,
-
-.. math::
-
-   I(r, \mu_r) = b \left[ 1 - e^{-\sigma_a s} \right], \qquad
-   s = r \mu_r + \sqrt{R^2 - r^2 \left( 1 - \mu_r^2 \right)},
-
-with :math:`s` the distance back along the ray to the surface. Taking the moments of this **on the same angular
-quadrature the solver uses** cancels the angle integration exactly, so the comparison
-isolates transport and interpolation error.
-
-The test is ``sc_sphere`` (``tst/inputs/sc_sphere.athinput``), which uses no fluid and runs a
-single cycle. Running it at three resolutions,
-
-.. code-block:: bash
-
-   for N in 32 64 128; do
-     ./athena -i tst/inputs/sc_sphere.athinput \
-              mesh/nx1=$N mesh/nx2=$N mesh/nx3=$N \
-              meshblock/nx1=$N meshblock/nx2=$N meshblock/nx3=$N
-   done
-
-writes the relative errors of :math:`J`, :math:`H` and :math:`K` for each run to
-``sc_sphere-errs.dat``:
-
-.. image:: /_static/nr_radiation_sphere.png
-   :alt: Emitting sphere test, mean intensity against the analytic profile and convergence
-   :align: center
-   :width: 90%
-
-The mean intensity tracks the analytic profile to better than 0.2 per cent through the
-interior, and the relative :math:`L_2` error of :math:`J` falls from
-:math:`1.4 \times 10^{-2}` at :math:`N = 32` to :math:`2.9 \times 10^{-3}` at
-:math:`N = 128`, an observed order of about 1.15. First order is expected: the residual panel
-shows the error concentrated in the last few cells before the surface, where the sphere is a
-staircase on a Cartesian grid, which is why the test compares only cells inside
-:math:`0.6 R`. Repeating the finest case on eight meshblocks reproduces the same error row
-exactly.
-
-Two further tests are bundled: ``sc_beam``, crossing pencil beams through a statically
-refined region, and ``sc_linwave``, a radiatively damped acoustic wave run under adaptive
-refinement in 1D, 2D and 3D, whose fitted frequency and damping rate are compared with the
-analytic dispersion relation (Eq. 38 of Davis, Stone & Jiang 2012).
+Two tests are bundled: ``sc_beam``, crossing pencil beams through a statically refined
+region, and ``sc_linwave``, a radiatively damped acoustic wave run under adaptive refinement
+in 1D, 2D and 3D, whose fitted frequency and damping rate are compared with the analytic
+dispersion relation (Eq. 38 of Davis, Stone & Jiang 2012).
 
 Current limitations
 -------------------
 
+- **Quasi-static only.** The transfer equation is solved in its time-independent form in
+  the grid frame; the intensity time derivative and all :math:`O(v/c)` terms are dropped
+  (Eq. 8 of Davis, Stone & Jiang 2012), so comoving and inertial frames are not
+  distinguished. The module is therefore only appropriate where the free-streaming and
+  diffusion times are both short compared with the fluid advection time.
 - **No variable Eddington tensor.** :math:`K_{ij}` is computed, but
   :math:`f_{ij} = K_{ij}/J` is never formed and no moment equations are integrated. Closing
   the moment equations with it, after `Jiang, Stone & Davis 2012
